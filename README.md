@@ -1,5 +1,6 @@
 Description
 ===========
+[![Gem Version](https://badge.fury.io/rb/iptables-ruby.svg)](http://badge.fury.io/rb/iptables-ruby)
 
 Iptables-gem is a Ruby API for parsing, generating, and comparing Linux
 iptables rules. It is configured using JSON and oriented toward use
