@@ -102,7 +102,7 @@ module IPTables
 
     def handle_integer()
       self.add_child( { 'comment' => "_ Port #{@info} - #{@name}" } )
-      self.add_child({ 
+      self.add_child({
         'raw' =>
         "-p tcp -m tcp --sport 1024:65535 --dport #{@info} -m state --state NEW,ESTABLISHED -j ACCEPT"
       })

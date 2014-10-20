@@ -27,7 +27,7 @@ module IPTables
           table = Table.new(table_name, self, table_info)
           @tables[table_name] = table
         }
-        
+
       when String
         self.parse(input.split(/\n/))
 
@@ -72,7 +72,7 @@ module IPTables
           @tables[table_name].merge(table_object)
           next
         end
-        
+
         # new table
         @tables[table_name] = table_object
       }
@@ -283,7 +283,7 @@ module IPTables
         @chains[chain_name] = chain_object if chain_object.complete?
       }
     end
-    
+
     def apply_additions(other_firewall)
       $log.debug("node addition points: #{@node_addition_points.inspect}")
       @chains.each{ |name, chain_object|
@@ -310,9 +310,9 @@ module IPTables
         position += 1
 
         case line
-        when @@chain_policy_regex 
+        when @@chain_policy_regex
           @chains[$1] = IPTables::Chain.new($1, {'policy' => $2}, self)
-        when @@chain_rule_regex 
+        when @@chain_rule_regex
           raise "unrecognized chain: #{$1}" unless @chains.has_key? $1
           @chains[$1].parse_rule($2)
         else
@@ -449,7 +449,7 @@ module IPTables
     def output_policy()
       return (@policy == nil) ? '-' : @policy
     end
-    
+
     def as_array(comments = true)
       $log.debug("Chain #{@name} array")
       return [] if @rules == nil
@@ -542,7 +542,7 @@ module IPTables
       @missing_rules = {}
       @new_rules = {}
       Diff::LCS.diff(
-        @chain1.as_array(@including_comments), 
+        @chain1.as_array(@including_comments),
         @chain2.as_array(@including_comments)
       ).each{ |diffgroup|
         diffgroup.each{ |diff|
@@ -695,7 +695,7 @@ module IPTables
       raise 'missing primitives' if primitives.nil?
       @rule_hash = {'empty' => nil} unless primitives.has_primitive?(@requires_primitive)
     end
-    
+
     def handle_custom_service()
       raise "missing service name: #{@rule_hash.inspect}" unless @rule_hash.has_key? 'service_name'
 
@@ -733,7 +733,7 @@ module IPTables
         self.add_child(rule_hash)
       }
     end
-    
+
     def handle_macro()
       config = @my_chain.my_table.my_iptables.config
       raise 'missing config' if config.nil?
@@ -743,7 +743,7 @@ module IPTables
         self.add_child(rule_hash)
       }
     end
-    
+
     def handle_node_addition_points()
       self.add_child({'empty' => nil})
       @rule_hash['node_addition_points'].each{ |addition_name|
@@ -804,23 +804,23 @@ module IPTables
         return rules
       end
     end
-    
+
     def generate_comment()
       @args = %Q|-m comment --comment "#{@rule_hash['comment']}"|
     end
-    
+
     def generate_raw()
       @args = @rule_hash['raw']
     end
-    
+
     def generate_tcp()
       @args = "-p tcp -m tcp --sport 1024:65535 --dport #{@rule_hash['service_tcp']} -m state --state NEW,ESTABLISHED -j ACCEPT"
     end
-    
+
     def generate_udp()
       @args = "-p udp -m udp --sport 1024:65535 --dport #{@rule_hash['service_udp']} -m state --state NEW,ESTABLISHED -j ACCEPT"
     end
-    
+
     def generate_ulog()
       @args = %Q|-m limit --limit 1/sec --limit-burst 2 -j ULOG --ulog-prefix "#{@my_chain.name}:"|
 
