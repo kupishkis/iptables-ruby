@@ -11,7 +11,7 @@ Gem::Specification.new do |gem|
   gem.authors       = ["Kurt Yoder", "Vytis Valentinavičius"]
   gem.email         = ["xytis2000 at gmail com"]
   gem.homepage      = "http://github.com/kupishkis/iptables-ruby"
-  gem.license       = "GNU"
+  gem.license       = "MIT"
 
   gem.add_dependency "diff-lcs", "~> 1"
 
