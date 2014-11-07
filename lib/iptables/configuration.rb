@@ -2,23 +2,20 @@ require 'json'
 
 module IPTables
   class Configuration
-    @@json_pattern = /\.js(on)?$/
 
     def initialize(*args)
-      @parsed_hash = {}
-      self.parse_files(*args)
-    end
-
-    def parse_files(*args)
-      args.each{ |arg|
-        $log.debug("reading arg #{arg}")
+      @config_hash = {}
+      args.each do |arg|
         case arg
-        when @@json_pattern
-          handle_json(arg)
+        when Hash
+          arg.each do |key, value|
+            raise "duplicate key: #{key}" if @config_hash.has_key? key
+            @config_hash[key] = value
+          end
         else
           raise "don't know how to handle #{arg.inspect}"
         end
-      }
+      end
     end
 
     def policy(in_policy = nil)
@@ -28,8 +25,8 @@ module IPTables
         @policy = in_policy
         return @policy
       end
-      raise 'missing policy' unless @parsed_hash.has_key? 'policy'
-      @policy = IPTables::Tables.new(@parsed_hash['policy'], self)
+      raise 'missing policy' unless @config_hash.has_key? 'policy'
+      @policy = IPTables::Tables.new(@config_hash['policy'], self)
     end
 
     def policy6(in_policy = nil)
@@ -39,8 +36,8 @@ module IPTables
         @policy6 = in_policy
         return @policy6
       end
-      raise 'missing policy6' unless @parsed_hash.has_key? 'policy6'
-      @policy6 = IPTables::Tables.new(@parsed_hash['policy6'], self)
+      raise 'missing policy6' unless @config_hash.has_key? 'policy6'
+      @policy6 = IPTables::Tables.new(@config_hash['policy6'], self)
     end
 
     def interpolations(in_interpolations = nil)
@@ -60,8 +57,8 @@ module IPTables
         @primitives = in_primitives
         return @primitives
       end
-      raise 'missing primitives' unless @parsed_hash.has_key? 'primitives'
-      @primitives = IPTables::Primitives.new(@parsed_hash['primitives'])
+      raise 'missing primitives' unless @config_hash.has_key? 'primitives'
+      @primitives = IPTables::Primitives.new(@config_hash['primitives'])
     end
 
     def rules(in_rules = nil)
@@ -71,8 +68,8 @@ module IPTables
         @rules = in_rules
         return @rules
       end
-      raise 'missing rules' unless @parsed_hash.has_key? 'rules'
-      @rules = IPTables::Tables.new(@parsed_hash['rules'], self)
+      raise 'missing rules' unless @config_hash.has_key? 'rules'
+      @rules = IPTables::Tables.new(@config_hash['rules'], self)
     end
 
     def services(in_services = nil)
@@ -82,8 +79,8 @@ module IPTables
         @services = in_services
         return @services
       end
-      raise 'missing services' unless @parsed_hash.has_key? 'services'
-      @services = IPTables::Services.new(@parsed_hash['services'])
+      raise 'missing services' unless @config_hash.has_key? 'services'
+      @services = IPTables::Services.new(@config_hash['services'])
     end
 
     def macros(in_macros = nil)
@@ -93,17 +90,8 @@ module IPTables
         @macros = in_macros
         return @macros
       end
-      raise 'missing macros' unless @parsed_hash.has_key? 'macros'
-      @macros = IPTables::Macros.new(@parsed_hash['macros'])
-    end
-
-    def handle_json(file_name)
-      json = File.read(file_name)
-      JSON.parse(json).each{ |key, value|
-        $log.debug("reading #{key} from file #{file_name}")
-        raise "duplicate key: #{key}" if @parsed_hash.has_key? key
-        @parsed_hash[key] = value
-      }
+      raise 'missing macros' unless @config_hash.has_key? 'macros'
+      @macros = IPTables::Macros.new(@config_hash['macros'])
     end
 
     def converge_firewall()
