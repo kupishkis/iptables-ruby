@@ -233,6 +233,15 @@ module IPTables
       $log.debug("table #{@name} is #{self}")
     end
 
+    def add_chain(name, policy = nil)
+      @chains[name] = IPTables::Chain.new(name, {'policy' => policy}, self)
+      @chains[name]
+    end
+
+    def del_chain(name)
+      @chains[name] = false
+    end
+
     def as_array(comments = true)
       policies = []
       chains = []
@@ -433,6 +442,26 @@ module IPTables
       @policy = @chain_info_hash['policy']
       @rules = self.find_and_add_type('rules')
       @additions = self.find_and_add_type('additions')
+    end
+
+    def clear_rules
+      @rules = []
+    end
+
+    def add_rule(rule)
+      @rules = @rules || []
+      rule_object = IPTables::Rule.new(rule, self)
+      rule_object.set_position(@rules.length)
+      rules.push(rule_object)
+    end
+
+    def del_rule(index = nil, &block)
+      if block_given?
+        return @rules.delete_if block
+      end
+      if index
+        return @rules.delete_at(index)
+      end
     end
 
     def find_and_add_type(data_type)
