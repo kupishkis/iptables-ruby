@@ -239,7 +239,7 @@ module IPTables
     end
 
     def del_chain(name)
-      @chains[name] = false
+      @chains.delete(name)
     end
 
     def as_array(comments = true)
@@ -457,7 +457,7 @@ module IPTables
 
     def del_rule(index = nil, &block)
       if block_given?
-        return @rules.delete_if block
+        return @rules.delete_if(&block)
       end
       if index
         return @rules.delete_at(index)
